@@ -61,20 +61,19 @@
 		</el-table>
 		<!-- 栏目管理表格结束 -->
 		<!-- 模态框 -->
-		<el-dialog :title="cDialog.title" top="0" width="400px" center custom-class="cDialogStyle" :visible.sync="cDialog.visible">
-			{{cDialog.form}}
+		<el-dialog :title="cDialog.title" top="0" width="300px"  custom-class="cDialogStyle" :visible.sync="cDialog.visible">
 		  <el-form :model="cDialog.form" :rules="cRules" size="mini" 
 				ref="cDialog.form" label-position="left" >
 		    <el-form-item label="栏目名称" label-width="6em" prop="name">
 		      <el-input v-model="cDialog.form.name" autocomplete="off"></el-input>
 		    </el-form-item>
-		    <el-form-item label="父栏目" label-width="6em" >
+		    <el-form-item label="父栏目" label-width="6em">
 		      <el-select v-model="cDialog.form.parentId" placeholder="---请选择---">
 		        <el-option :key='c.id' v-for='c in categories' :label="c.name" :value="c.id"></el-option>
 		      </el-select>
 		    </el-form-item>
 		    <el-form-item label="栏目描述" prop="comment">
-		    	 <mavon-editor v-model="cDialog.form.comment"></mavon-editor>
+		    	 <el-input v-model="cDialog.form.comment" type="textarea" :rows="4"></el-input>
 		    </el-form-item>
 		  </el-form>
 		  <div slot="footer" class="dialog-footer">
@@ -109,9 +108,10 @@
 		methods:{
 			...category,
 			//打开修改栏目模态框
-			toUpDataCategory(category){
+			toUpDataCategory(row){
 				this.cDialog.title="修改栏目";
-				this.cDialog.form=Object.assign({},category);
+				row.parentId=row.parent.id;
+				this.cDialog.form=Object.assign({},row);
 				this.cDialog.visible=true;
 			},
 			//验证栏目信息

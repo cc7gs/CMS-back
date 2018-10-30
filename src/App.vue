@@ -22,10 +22,20 @@
                   <i class="el-icon-menu"></i>
                   <span slot="title">栏目管理</span>
                 </el-menu-item>
-                <el-menu-item index="/article">
-                  <i class="el-icon-document"></i>
-                  <span slot="title">文章管理</span>
-                </el-menu-item>
+                <el-submenu index="/article">
+                    <template slot="title" >
+                       <i class="el-icon-document"></i>
+                       <span slot="title">文章管理</span>
+                    </template>
+                    <el-menu-item index="/article">
+                         <i class="el-icon-view"></i>
+                        <span slot="title">查看文章</span>
+                    </el-menu-item>
+                    <el-menu-item index="/editArticle">
+                        <i class="el-icon-edit"></i>
+                        <span slot="title">编写文章</span>
+                    </el-menu-item>
+                </el-submenu>
                 <el-menu-item index="/user">
                   <i class="el-icon-setting"></i>
                   <span slot="title">用户管理</span>
@@ -66,28 +76,26 @@
 </template>
 
 <script>
-export default {
-  name: 'App',
-  data(){
-    return {
-      msg:'App.vue',
-      currentRouter:'/'
+  export default {
+    name: 'App',
+    data(){
+      return {
+        msg:'App.vue',
+        currentRouter:'/'
+      }
+    },
+    methods:{
+     
+    },
+    watch:{
+      '$route':function(to,from){
+          this.currentRouter=to.path;
+      }
+    },
+    beforeMount(){
+        this.currentRouter=this.$route.path;
     }
-  },
-  methods:{
-   
-  },
-  watch:{
-    '$route':function(to,from){
-      console.log(this.$route);
-      console.log('toPath',to.path);
-        this.currentRouter=to.path;
-    }
-  },
-  beforeMounte(){
-      this.currentRouter=this.$route.path;
   }
-}
 </script>
 
 <style>
@@ -97,6 +105,9 @@ export default {
       height: 100%;
       font-family: '微软雅黑';
       font-size: 14px;
+    }
+    ul,li{
+      list-style: none;
     }
     div{
       box-sizing: border-box;
@@ -138,7 +149,6 @@ export default {
       font-size:20px;
       line-height: 40px;
     }
-
     .rightDiv .rightTop{
         height: 7%;
         border-bottom: 2px solid #fcfcfc;
@@ -154,9 +164,9 @@ export default {
       animation: run 5s ease-in-out infinite alternate;
     }
    .usericon:hover{
-    background-color: #409EFF;
-    opacity: .5;
-    animation-play-state:paused;
+      background-color: #409EFF;
+      opacity: .5;
+      animation-play-state:paused;
    }
     /*右侧导航tabs*/
    .rightDiv .currentTab{
@@ -177,18 +187,17 @@ export default {
       overflow-y: auto;
    }
    @keyframes run{
-    form {
-        right:5%;
-    }to{
-      right:92%;
-    }
-
+      form {
+          right:5%;
+      }to{
+        right:92%;
+      }
    }
     @keyframes zoom{
-    from{
-      transform: scaleX(0);
-    }to{
-      transform: scaleX(1);
-    }
+      from{
+        transform: scaleX(0);
+      }to{
+        transform: scaleX(1);
+      }
   }
 </style>

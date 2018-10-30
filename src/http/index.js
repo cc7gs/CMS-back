@@ -222,7 +222,7 @@ let category={
 let article={
 	/*提交或者保存信息*/
 	saveOrUpdateArticle(){
-		console.log(this.aDialog.form);
+		console.log('save',this.aDialog.form);
 		axios.post('/manager/article/saveOrUpdateArticle',this.aDialog.form)
 		.then(()=>{
 			this.$notify.success({
@@ -318,6 +318,7 @@ let article={
 	// 查找文章
 	findArticle(){
 		this.loading=true;
+		
 		axios.get('/manager/article/findArticle',{
 			params:this.params
 		})
