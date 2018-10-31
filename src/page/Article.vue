@@ -33,13 +33,17 @@
 			width="180">
 			</el-table-column>
 			<el-table-column
-			prop="author"
-			label="作者"
+			prop="category.name"
+			label="所属栏目"
 			width="120">
 			</el-table-column>
 			<el-table-column
 			prop="publishtime"
 			label="发布时间">
+			</el-table-column>
+			<el-table-column
+			prop="author"
+			label="作者">
 			</el-table-column>
 			<el-table-column
 			prop="readtimes"
@@ -50,7 +54,7 @@
 			label="审阅"
 			width="180">
 			</el-table-column>
-			<el-table-column label="操作" width='100'>
+			<el-table-column label="操作" width='120'>
 				<template slot-scope='{row}'>
 					<el-button type="primary" title="修改文章" size="mini" icon="el-icon-edit" circle @click="toUpdateArticle(row)">
 					</el-button>
@@ -64,10 +68,10 @@
 		<div class="pagination">
 			<el-pagination
 			  background
+ 			  layout="prev, pager, next"
 			  :page-size="params.pageSize"
 			  :current-page="(params.page+1)"
 			  @current-change="handlePaginationChange"
-			  layout="prev, pager, next"
 			  :total="total">
 			</el-pagination>
 		</div>
@@ -75,7 +79,7 @@
 		<!-- 模态框 -->
 		<el-dialog :title="aDialog.title" :visible.sync="aDialog.visible" fullscreen>
 			<el-form :model="aDialog.form" size="mini" label-position="left" >
-			{{aDialog.form}}
+			{{aDialog.form}}--{{aDialog.fileList}}
 				<el-form-item label="资讯标题" label-width="6em">
 					<el-input v-model="aDialog.form.title" autocomplete="off"></el-input>
 				</el-form-item>
@@ -99,14 +103,18 @@
 			    <el-form-item label="缩略图" label-width="6em">
 					<el-upload
 					  action="http://120.78.164.247:8099/manager/file/upload"
+					  :limit="3"
 					  :on-success='handleUploadSuccess'
+					  :on-exceed="handleExceed"
+					  :on-remove="handleUploadRemove"
+			  		  :before-remove="beforeRemoveConfirm"
+					  :file-list="aDialog.fileList"
 					  list-type="picture">
 					  <el-button size="small" type="primary">点击上传</el-button>
-					  <div slot="tip" class="el-upload__tip">只能上传jpg/png文件，且不超过500kb</div>
 					</el-upload>
 			    </el-form-item>
 				<el-form-item label="资讯正文" >
-					<mavon-editor v-model="aDialog.form.content"></mavon-editor>
+					<mavon-editor ref=md v-model="aDialog.form.content"></mavon-editor>
 				</el-form-item>
 			</el-form>
 			<div slot="footer" class="dialog-footer">
@@ -115,10 +123,12 @@
 			</div>
 		</el-dialog>
 		<!-- 模态框结束 -->
+
 	</div>
 </template>
 <script>
 	import {article} from '@/http/index'
+	import axios from '@/http/axios'
 
 	export default{
 		data(){
@@ -136,11 +146,12 @@
 						liststyle:'style-one',
 						fileIds:[]
 					},
+					fileList:[]
 				},
 				total:40, //默认文章总数 40
 				params:{   //存储分页、搜索数据
 					page:0,
-					pageSize:3,
+					pageSize:5,
 					categoryId:undefined,
 					keywords:undefined
 				}
@@ -160,31 +171,77 @@
 		},
 		methods:{
 			...article,
+			//当选择栏目时则默认从第0也显示
 			selectChange(val){
 				this.params.page=0;
 			},
+			//当用户移除文件时则将图片和问题与该文章解除绑定
+			handleUploadRemove(file){
+				console.log('file',file.name);
+				axios.get('/manager/file/delete',{
+					params:{
+						id:file.name
+					}
+				})
+				.then(()=>{
+					this.$notify({title:'成功', message:'操作成功'})
+					console.log(_.remove());
+					//删除fileIds中文件id
+					_.remove(this.aDialog.form.fileIds,(id)=>{
+						return id==file.name;
+					});
+					this.aDialog.form.fileIds.push(1);
+					this.aDialog.form.fileIds.pop();
+				})
+				.catch(()=>{
+					this.$notify.error({
+						title:'错误',
+						message:'网络异常'
+					})
+				})
+			},
+			//当要移除文件时则提示用户
+			beforeRemoveConfirm(file, fileList){
+				return this.$confirm(`确定移除 ${ file.name }？`);
+			},
+			//当上传的数量超过限制
+			handleExceed(files,fileList){
+				this.$message.warning(`当前限制选择3个文件，本次选择了{files.length}个文件
+					共选择了${files.length+fileList.length}`)
+			},
 			//成功上传图片的回调
 			handleUploadSuccess(response, file, fileList){
-			
+				file.name=response.data.id;
 				this.aDialog.form.fileIds.push(response.data.id);
 			},
 			/*修改栏目信息*/
 			toUpdateArticle(row){
-				this.aDialog.title='修改文章';
-				
-				row.categoryId=row.category.id;
-				this.aDialog.form=Object.assign({},row);
-				this.aDialog.form.fileIds=row.articleFileVMs[0].cmsFile.id;
-				delete this.aDialog.form.category;
-				delete this.aDialog.form.articleFileVMs;
-				//将内容为null的删除
-				for(let key in this.aDialog.form){
-						let val=this.aDialog.form[key];
+				console.log(row);
+				this.aDialog.title='修改资讯';
+				this.aDialog.visible=true;
+				//克隆当前行数据
+				let article=JSON.parse(JSON.stringify(row));
+				//显示用户上传过的图片
+				this.aDialog.fileList=article.articleFileVMs.map((item)=>{
+					return {
+						name:item.cmsFile.id,
+						url:'http://39.108.81.60:8888/group1/'+item.cmsFile.id
+					}
+				});
+				article.categoryId=article.category?article.category.id:'';
+				delete article.category;
+				//将图片的idc存储到fileIds
+				article.fileIds=article.articleFileVMs.map(item=>item.cmsFile.id);
+				delete article.articleFileVMs;
+				//删除默认空值
+				for(let key in article){
+					let val=article[key];
 					if(!val){
-						delete this.aDialog.form[key];
+						delete article[key];
 					}
 				}
-				this.aDialog.visible=true;
+				//将处理后的结果与表单双向绑定
+				this.aDialog.form=article;
 			},
 			/*关闭模态框*/
 			closeADialog(){
@@ -192,7 +249,8 @@
 			},
 			/*弹出模态框*/
 			toAddArticle(){
-				this.aDialog.title='新增文章';
+				this.aDialog.title='发布资讯';
+				//初始化表单数据
 				this.aDialog.form={liststyle:'style-one',fileIds:[]}
 				this.aDialog.visible=true;
 			},

@@ -222,20 +222,32 @@ let category={
 let article={
 	/*提交或者保存信息*/
 	saveOrUpdateArticle(){
-		console.log('save',this.aDialog.form);
+			//将富文本编辑器的内容上传到source中
+			this.aDialog.form.source=this.$refs.md.d_render;
+			console.log(this.aDialog.form);
 		axios.post('/manager/article/saveOrUpdateArticle',this.aDialog.form)
-		.then(()=>{
-			this.$notify.success({
-				title: '成功',
-				message: '提交成功！'
-			});
-			this.closeADialog();
-			this.findArticle();
+		.then(({data:result})=>{
+			if(result.status==200){
+				//1.关闭模态框
+				this.closeADialog();
+				//2. 提示成功
+				this.$notify.success({
+					title: '成功',
+					message:result.message
+				});
+				//3 刷新
+				this.findArticle();
+			}else{
+				this.$notify.success({
+					title: '错误',
+					message:result.message
+				});
+			}
 		})
 		.catch((error)=>{
 			this.$notify.error({
 				title: '错误',
-				message: '提交失败！'
+				message: '网络异常'
 			});
 		});
 	},
