@@ -171,8 +171,19 @@
 			/*修改栏目信息*/
 			toUpdateArticle(row){
 				this.aDialog.title='修改文章';
-				row.categoryId=this.params.categoryId;
+				
+				row.categoryId=row.category.id;
 				this.aDialog.form=Object.assign({},row);
+				this.aDialog.form.fileIds=row.articleFileVMs[0].cmsFile.id;
+				delete this.aDialog.form.category;
+				delete this.aDialog.form.articleFileVMs;
+				//将内容为null的删除
+				for(let key in this.aDialog.form){
+						let val=this.aDialog.form[key];
+					if(!val){
+						delete this.aDialog.form[key];
+					}
+				}
 				this.aDialog.visible=true;
 			},
 			/*关闭模态框*/

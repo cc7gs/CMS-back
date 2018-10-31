@@ -51,6 +51,7 @@
       <div class="rightTop">
         <i class="el-icon-menu collapseicon"></i>
         <div class="usericon">
+          一点资讯后台管理系统
         </div>
       </div>
       <!-- 右侧的头部结束 -->
@@ -150,18 +151,24 @@
       line-height: 40px;
     }
     .rightDiv .rightTop{
-        height: 7%;
+           height: 7%;
         border-bottom: 2px solid #fcfcfc;
     }
     .usericon{
-      width: 40px;
-      height: 40px;
       position: absolute;
-      right: 5%;
       top:0;
-      border:1px solid #303133;
-      border-radius: 50%;
-      animation: run 5s ease-in-out infinite alternate;
+      left: 50%;
+      height: 7%;
+      line-height: 2em;
+      margin-left: -400px;
+      font-size: 24px;
+      letter-spacing: 2em;
+      color: rgba(0,0,0,0);
+      -webkit-background-clip:text;
+      background-image: linear-gradient(0deg, #409EFF 0%, #409EFF 100%);
+      background-size: 0px 100%;
+      background-repeat: no-repeat;
+      animation: run 5s ease-in-out infinite;
     }
    .usericon:hover{
       background-color: #409EFF;
@@ -188,9 +195,12 @@
    }
    @keyframes run{
       form {
-          right:5%;
+       
+           background-size: 0px 100%;
+
       }to{
-        right:92%;
+        
+        background-size: 100% 100%;
       }
    }
     @keyframes zoom{
