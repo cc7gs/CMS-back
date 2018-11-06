@@ -53,6 +53,20 @@
         <div class="usericon">
           一点资讯后台管理系统
         </div>
+        <div class="info">
+          <img :src="user.userface" alt="">
+          <div class="user">
+              <el-dropdown @command="handleCommand">
+                  <span class="el-dropdown-link">
+                    {{user.nickname}}<i class="el-icon-arrow-down el-icon--right"></i>
+                  </span>
+                  <el-dropdown-menu slot="dropdown">
+                    <el-dropdown-item>个人中心</el-dropdown-item>
+                    <el-dropdown-item command='logout'>退出</el-dropdown-item>
+                  </el-dropdown-menu>
+              </el-dropdown>
+          </div>
+        </div>
       </div>
       <!-- 右侧的头部结束 -->
       <!-- 当前栏目tabs -->
@@ -77,12 +91,14 @@
 </template>
 
 <script>
+import axios from '@/http/axios'
   export default {
     name: 'App',
     data(){
       return {
         msg:'App.vue',
-        currentRouter:'/'
+        currentRouter:'/',
+        user:{}
       }
     },
     methods:{
@@ -95,6 +111,22 @@
     },
     beforeMount(){
         this.currentRouter=this.$route.path;
+        //处理用户登录
+        let user=JSON.parse(localStorage.getItem('user'));
+        if(user){
+          this.user=user;
+        }else{
+          window.vm.currentComponent="Login";
+        }
+    },
+    methods:{
+      handleCommand(command){
+        if(command == 'logout'){
+          axios.get('/logout').then(()=>{
+            localStorage.removeItem('user')
+          });
+        }
+      }
     }
   }
 </script>
@@ -175,6 +207,26 @@
       opacity: .5;
       animation-play-state:paused;
    }
+   .rightTop .info{
+      position: absolute;
+      right: 1em;
+      top:.5em;
+      text-align: right;
+   }
+   .rightTop .info img{
+      width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    margin-top: 5px;
+    margin-right: 1em;
+   }
+   .rightTop .info>.user {
+    float: right;
+    cursor: pointer;
+  }
+  .rightTop .info > .user el-dropdown {
+    color: #fff;
+  }
     /*右侧导航tabs*/
    .rightDiv .currentTab{
       height: 5%;

@@ -79,7 +79,7 @@
 		<!-- 模态框 -->
 		<el-dialog :title="aDialog.title" :visible.sync="aDialog.visible" fullscreen>
 			<el-form :model="aDialog.form" size="mini" label-position="left" >
-			{{aDialog.form}}--{{aDialog.fileList}}
+			{{aDialog.form}}
 				<el-form-item label="资讯标题" label-width="6em">
 					<el-input v-model="aDialog.form.title" autocomplete="off"></el-input>
 				</el-form-item>
@@ -102,7 +102,7 @@
 			    </el-form-item>
 			    <el-form-item label="缩略图" label-width="6em">
 					<el-upload
-					  action="http://120.78.164.247:8099/manager/file/upload"
+					  action="http://120.79.179.26:8888/manager/file/upload"
 					  :limit="3"
 					  :on-success='handleUploadSuccess'
 					  :on-exceed="handleExceed"
@@ -175,7 +175,7 @@
 			selectChange(val){
 				this.params.page=0;
 			},
-			//当用户移除文件时则将图片和问题与该文章解除绑定
+			//当用户移除文件时则将图片和图片服务器中与该文章解除绑定
 			handleUploadRemove(file){
 				console.log('file',file.name);
 				axios.get('/manager/file/delete',{
@@ -185,7 +185,6 @@
 				})
 				.then(()=>{
 					this.$notify({title:'成功', message:'操作成功'})
-					console.log(_.remove());
 					//删除fileIds中文件id
 					_.remove(this.aDialog.form.fileIds,(id)=>{
 						return id==file.name;
@@ -211,6 +210,8 @@
 			},
 			//成功上传图片的回调
 			handleUploadSuccess(response, file, fileList){
+				console.log('id--------'+JSON.stringify(response));
+				
 				file.name=response.data.id;
 				this.aDialog.form.fileIds.push(response.data.id);
 			},
@@ -225,7 +226,7 @@
 				this.aDialog.fileList=article.articleFileVMs.map((item)=>{
 					return {
 						name:item.cmsFile.id,
-						url:'http://39.108.81.60:8888/group1/'+item.cmsFile.id
+						url:'http://120.79.179.26:8888/group1/'+item.cmsFile.id
 					}
 				});
 				article.categoryId=article.category?article.category.id:'';
